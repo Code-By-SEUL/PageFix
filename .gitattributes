@@ -1,0 +1,20 @@
+# normalise line endings (the server may be Windows, contributors anywhere)
+* text=auto eol=lf
+*.php text eol=lf
+*.js  text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md  text eol=lf
+
+# binary files
+*.png binary
+*.ico binary
+*.pdf binary
+*.ttf binary
+*.pfb binary
+*.bcmap binary
+*.wasm binary
+*.icc binary
+
+# third-party code: excluded from diffs and from GitHub language statistics
+lib/** linguist-vendored -diff

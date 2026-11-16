@@ -1,0 +1,15 @@
+# PageFix – setări Apache (XAMPP)
+DirectoryIndex index.php
+
+<IfModule mod_mime.c>
+    AddType text/javascript .js .mjs
+    AddType application/wasm .wasm
+    AddType application/octet-stream .bcmap .pfb
+</IfModule>
+
+# Fișierele aplicației (inclusiv manualul HTML) nu se păstrează în cache (se modifică des).
+<IfModule mod_headers.c>
+    <FilesMatch "\.(php|js|css|html)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>

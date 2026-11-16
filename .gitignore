@@ -1,0 +1,14 @@
+# local settings (author, language…) – never commit
+config.local.php
+
+# build / release artefacts
+*.zip
+/dist/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp

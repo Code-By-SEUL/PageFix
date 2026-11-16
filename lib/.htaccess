@@ -1,0 +1,4 @@
+# Librăriile terțe se schimbă rar – pot sta în cache o săptămână.
+<IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=604800"
+</IfModule>

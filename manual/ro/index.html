@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: Apache-2.0 – Copyright 2026 Marius SEUL – https://code-by-seul.ro/ -->
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PageFix – Manual de utilizare</title>
+<link rel="icon" type="image/png" href="../../assets/img/favicon-32.png">
+<script>
+// Tema manualului urmează tema aleasă în aplicație (salvată în browser), altfel setarea sistemului.
+(function applyManualTheme() {
+  var themePreference = 'auto';
+  try {
+    var storedPreference = localStorage.getItem('pagefix.theme');
+    if (storedPreference) {
+      themePreference = storedPreference;
+    }
+  } catch (storageError) {
+    // localStorage indisponibil – se folosește setarea sistemului
+  }
+
+  var useDarkTheme = false;
+  if (themePreference === 'dark') {
+    useDarkTheme = true;
+  } else if (themePreference !== 'light') {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      useDarkTheme = true;
+    }
+  }
+
+  if (useDarkTheme) {
+    document.documentElement.dataset.theme = 'dark';
+  } else {
+    document.documentElement.dataset.theme = 'light';
+  }
+})();
+</script>
+<style>
+/* ===================== Culori (aceleași ca în aplicație) ===================== */
+:root {
+  --bg: #f3f4f6;
+  --panel: #ffffff;
+  --panel-2: #f8fafc;
+  --line: #dfe2e7;
+  --text: #1f2933;
+  --text-2: #374151;
+  --muted: #6b7480;
+  --accent: #2563eb;
+  --accent-soft: #e8efff;
+  --accent-line: #c9d8fb;
+  --tip-bg: #e8efff;      --tip-line: #c9d8fb;      --tip-text: #1e3a8a;
+  --warn-bg: #fff8e6;     --warn-line: #f3d9a4;     --warn-text: #6b4a00;
+  --note-bg: #f1f5f9;     --note-line: #dfe2e7;     --note-text: #374151;
+  --danger: #c62828;
+  --topbar-bg: #1e293b;
+  --kbd-bg: #ffffff;
+  --shadow: rgba(15, 23, 42, .08);
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --bg: #0f141b;
+  --panel: #1a212b;
+  --panel-2: #141a22;
+  --line: #2c3644;
+  --text: #e5e9ef;
+  --text-2: #cbd2db;
+  --muted: #8e99a8;
+  --accent: #4f8cff;
+  --accent-soft: #1c2a44;
+  --accent-line: #2f4a7a;
+  --tip-bg: #1c2a44;      --tip-line: #2f4a7a;      --tip-text: #c9dbff;
+  --warn-bg: #3a2f14;     --warn-line: #6b5520;     --warn-text: #f3d9a4;
+  --note-bg: #1f2833;     --note-line: #2c3644;     --note-text: #cbd2db;
+  --danger: #ef5350;
+  --kbd-bg: #11171f;
+  --shadow: rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+/* ===================== Așezare în pagină ===================== */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); line-height: 1.6; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 20px; background: var(--topbar-bg); color: #fff;
+}
+.topbar .wordmark { font-weight: 800; font-size: 22px; letter-spacing: -.02em; }
+.topbar .wm-a { color: #ff2a2f; }
+.topbar .wm-b { color: #e5e7eb; }
+.topbar .subtitle { color: #cbd5e1; font-size: 15px; }
+.topbar .spacer { flex: 1; }
+.topbar button {
+  display: none; font: inherit; font-size: 14px; color: #fff; background: transparent;
+  border: 1px solid #475569; border-radius: 8px; padding: 6px 12px; cursor: pointer;
+}
+
+.layout { display: flex; align-items: flex-start; max-width: 1600px; margin: 0 auto; }
+
+.toc {
+  position: sticky; top: 56px; width: 290px; flex: none;
+  max-height: calc(100vh - 56px); overflow-y: auto;
+  padding: 20px 14px 40px 20px; font-size: 14.5px;
+}
+.toc input {
+  width: 100%; font: inherit; padding: 8px 10px; margin-bottom: 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text);
+}
+.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+.toc li { margin: 1px 0; }
+.toc a {
+  display: block; padding: 4px 10px; border-radius: 6px;
+  color: var(--text-2); text-decoration: none;
+}
+.toc a:hover { background: var(--accent-soft); color: var(--accent); }
+.toc a.current { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.toc .no-results { color: var(--muted); padding: 4px 10px; display: none; }
+
+main { flex: 1; min-width: 0; padding: 20px 28px 80px; }
+
+section.chapter {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  padding: 8px 32px 24px; margin-bottom: 22px; box-shadow: 0 1px 3px var(--shadow);
+}
+h1 { font-size: 30px; margin: 18px 0 6px; }
+h2 { font-size: 24px; margin: 22px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--accent-line); }
+h3 { font-size: 19px; margin: 26px 0 8px; }
+h4 { font-size: 16.5px; margin: 20px 0 6px; }
+p, li { color: var(--text-2); }
+a { color: var(--accent); }
+strong { color: var(--text); }
+.lead { font-size: 18px; color: var(--text-2); }
+.chapter-number { color: var(--accent); margin-right: 8px; }
+
+/* ===================== Elemente ===================== */
+/* butoanele aplicației, așa cum apar pe ecran */
+.ui {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  padding: 1px 8px; margin: 0 1px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--panel-2); color: var(--text); font-size: .93em; font-weight: 600;
+}
+.ic { width: 1.05em; height: 1.05em; flex: none; }
+.icon-only { display: inline-flex; vertical-align: -2px; }
+kbd {
+  display: inline-block; min-width: 1.7em; padding: 0 6px; text-align: center;
+  font: 600 .88em/1.6 "Segoe UI", system-ui, sans-serif; color: var(--text);
+  background: var(--kbd-bg); border: 1px solid var(--line); border-bottom-width: 3px; border-radius: 6px;
+}
+
+figure { margin: 18px 0; }
+figure a { display: inline-block; max-width: 100%; }
+figure img {
+  display: block; max-width: 100%; height: auto; border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: 0 2px 10px var(--shadow); background: #fff;
+}
+figure.small img { max-width: 460px; }
+figure.medium img { max-width: 640px; }
+figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+.callout { border: 1px solid; border-left-width: 5px; border-radius: 8px; padding: 10px 16px; margin: 16px 0; }
+.callout p { margin: 6px 0; color: inherit; }
+.callout .title { font-weight: 700; display: block; margin-bottom: 2px; }
+.tip { background: var(--tip-bg); border-color: var(--tip-line); color: var(--tip-text); }
+.warn { background: var(--warn-bg); border-color: var(--warn-line); color: var(--warn-text); }
+.note { background: var(--note-bg); border-color: var(--note-line); color: var(--note-text); }
+.callout li { color: inherit; }
+
+/* pașii unei proceduri, numerotați în cerc */
+ol.steps { list-style: none; counter-reset: step; padding-left: 0; }
+ol.steps > li { counter-increment: step; position: relative; padding-left: 44px; margin: 10px 0; min-height: 30px; }
+ol.steps > li::before {
+  content: counter(step); position: absolute; left: 0; top: 0;
+  width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px;
+}
+
+/* legenda capturii adnotate */
+ol.legend { list-style: none; padding-left: 0; }
+ol.legend > li { position: relative; padding-left: 44px; margin: 10px 0; }
+ol.legend > li .badge {
+  position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%;
+  background: #e5534b; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+
+table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 15px; }
+th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; color: var(--text-2); }
+th { background: var(--panel-2); color: var(--text); }
+td code, p code, li code {
+  font-family: Consolas, "Courier New", monospace; font-size: .92em;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; color: var(--text);
+}
+
+/* grila celor 9 poziții */
+.position-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; max-width: 420px;
+  aspect-ratio: 210 / 180; padding: 6px; border: 2px solid var(--muted); border-radius: 4px; background: var(--panel-2);
+}
+.position-grid div {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  border: 1px dashed var(--line); border-radius: 4px; font-size: 14px; color: var(--text-2); background: var(--panel);
+}
+
+details { border: 1px solid var(--line); border-radius: 8px; margin: 10px 0; background: var(--panel-2); }
+details summary { cursor: pointer; padding: 10px 14px; font-weight: 600; color: var(--text); }
+details[open] summary { border-bottom: 1px solid var(--line); }
+details .answer { padding: 4px 16px 10px; }
+
+.back-to-top { display: inline-block; margin-top: 10px; font-size: 14px; color: var(--muted); text-decoration: none; }
+.back-to-top:hover { color: var(--accent); }
+.hidden-by-search { display: none; }
+footer.manual-footer { text-align: center; color: var(--muted); font-size: 14px; padding: 10px 0 30px; }
+
+/* ===================== Ecrane mici ===================== */
+@media (max-width: 900px) {
+  .topbar button { display: inline-block; white-space: nowrap; }
+  .topbar .version-label { display: none; }
+  .topbar { gap: 10px; padding: 10px 14px; }
+  .layout { display: block; }
+  .toc {
+    display: none; position: static; width: auto; max-height: none;
+    background: var(--panel); border-bottom: 1px solid var(--line);
+  }
+  .toc.open { display: block; }
+  main { padding: 14px; }
+  section.chapter { padding: 4px 16px 18px; }
+  figure.small img, figure.medium img { max-width: 100%; }
+}
+
+/* ===================== Tipărire ===================== */
+@media print {
+  .topbar, .toc, .back-to-top { display: none; }
+  body { background: #fff; }
+  main { padding: 0; }
+  section.chapter { box-shadow: none; border: none; page-break-before: always; }
+  figure { page-break-inside: avoid; }
+  .hidden-by-search { display: block; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-crop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-extract" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/><path d="M13 3l6 6v3"/><path d="M13 3v6h6"/><path d="M15 18h7M19 15l3 3-3 3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="1.5"/><path d="M9 9V7h2M15 15v2h-2M9 15v2h2M15 9V7h-2"/></symbol>
+  <symbol id="i-fitpage" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M3 8V4h2M21 8V4h-2M3 16v4h2M21 16v4h-2" opacity=".6"/></symbol>
+  <symbol id="i-fitwidth" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M2 12h3M19 12h3M4 10l-2 2 2 2M20 10l2 2-2 2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></symbol>
+  <symbol id="i-header" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1.5"/><path d="M8 6h8M8 18h8"/><path d="M4 9h16M4 15h16" opacity=".35"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6M12 16.8h.01"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-insert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15h6"/></symbol>
+  <symbol id="i-interleave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/><path d="M15 7h4v4M9 17H5v-4"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+  <symbol id="i-reverse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20V4M3 8l4-4 4 4"/><path d="M17 4v16M13 16l4 4 4-4"/></symbol>
+  <symbol id="i-rot180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="i-rotl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-rotr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="i-select" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></symbol>
+  <symbol id="i-stamp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1.5"/><path d="m8 16 8-8"/><path d="M9 9.5 10.5 8M13.5 16 15 14.5" opacity=".5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-zoomin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M11 8v6M8 11h6"/></symbol>
+  <symbol id="i-zoomout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8 11h6"/></symbol>
+</svg>
+
+<header class="topbar">
+  <span class="wordmark"><span class="wm-a">Page</span><span class="wm-b">Fix</span></span>
+  <span class="subtitle">Manual de utilizare<span class="version-label"> · versiunea 0.7.0</span></span>
+  <span class="spacer"></span>
+  <button type="button" id="tocToggle" aria-controls="toc" aria-expanded="false">☰ Cuprins</button>
+</header>
+
+<div class="layout">
+
+<nav class="toc" id="toc" aria-label="Cuprins">
+  <input type="search" id="tocSearch" placeholder="Caută în manual…" aria-label="Caută în manual">
+  <ol id="tocList">
+    <li><a href="#ce-este">1. Ce este PageFix</a></li>
+    <li><a href="#primii-pasi">2. Primii pași</a></li>
+    <li><a href="#ecranul">3. Cum arată ecranul</a></li>
+    <li><a href="#deschidere">4. Deschiderea și combinarea fișierelor</a></li>
+    <li><a href="#selectie">5. Selectarea paginilor</a></li>
+    <li><a href="#intervale">6. Cum scrii un interval de pagini</a></li>
+    <li><a href="#rotire">7. Rotirea paginilor</a></li>
+    <li><a href="#ordine">8. Schimbarea ordinii paginilor</a></li>
+    <li><a href="#stergere">9. Ștergerea paginilor</a></li>
+    <li><a href="#inserare">10. Inserarea de pagini</a></li>
+    <li><a href="#extragere">11. Extragerea paginilor într-un PDF nou</a></li>
+    <li><a href="#impartire">12. Împărțirea documentului</a></li>
+    <li><a href="#intercalare">13. Intercalarea (scanări față / verso)</a></li>
+    <li><a href="#decupare">14. Decuparea marginilor</a></li>
+    <li><a href="#incadrare">15. Încadrarea într-un format</a></li>
+    <li><a href="#suprapuneri">16. Suprapuneri: numere, antet, watermark, imagine</a></li>
+    <li><a href="#straturi">17. Panoul Straturi</a></li>
+    <li><a href="#previzualizare">18. Previzualizarea unei pagini</a></li>
+    <li><a href="#anulare">19. Anularea greșelilor</a></li>
+    <li><a href="#salvare">20. Salvarea (descărcarea) rezultatului</a></li>
+    <li><a href="#personalizare">21. Temă, limbă și mărimea miniaturilor</a></li>
+    <li><a href="#taste">22. Scurtături de tastatură</a></li>
+    <li><a href="#probleme">23. Întrebări frecvente și probleme</a></li>
+    <li><a href="#limite">24. Ce nu poate face PageFix</a></li>
+    <li><a href="#dictionar">25. Mic dicționar</a></li>
+    <li><a href="#despre">26. Despre aplicație</a></li>
+  </ol>
+  <p class="no-results" id="tocNoResults">Nu am găsit nimic. Încearcă alt cuvânt.</p>
+</nav>
+
+<main id="content">
+
+<!-- ===================================================================== -->
+<section class="chapter" id="ce-este">
+<h1>PageFix – manual de utilizare</h1>
+<p class="lead">Acest manual îți arată, pas cu pas, cum să lucrezi cu PageFix. Nu ai nevoie de cunoștințe tehnice: fiecare operație este explicată pe rând, cu imagini din aplicație.</p>
+<div class="callout tip">
+  <span class="title">Cum deschizi manualul din aplicație</span>
+  <p>Apasă butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg></span> din bara de sus a aplicației sau tasta <kbd>F1</kbd>. Manualul se deschide într-o filă nouă a browserului, iar aplicația, cu documentul la care lucrezi, rămâne deschisă în fila ei. Ca să revii, dă click pe fila PageFix (sau închide fila manualului).</p>
+</div>
+
+<h2><span class="chapter-number">1.</span>Ce este PageFix</h2>
+<p><strong>PageFix</strong> este o aplicație pentru <strong>aranjarea documentelor PDF</strong>. Se deschide în browser (programul cu care navighezi pe internet, de exemplu Google Chrome, Microsoft Edge sau Mozilla Firefox), deci nu trebuie instalată pe calculator.</p>
+
+<p>Cu PageFix poți:</p>
+<ul>
+  <li><strong>combina</strong> mai multe fișiere PDF (și imagini) într-un singur document;</li>
+  <li><strong>roti</strong> paginile culcate sau întoarse invers;</li>
+  <li><strong>muta</strong> paginile în altă ordine, <strong>șterge</strong> paginile în plus sau <strong>dubla</strong> o pagină;</li>
+  <li><strong>insera</strong> pagini albe, pagini din alt PDF sau fotografii;</li>
+  <li><strong>extrage</strong> câteva pagini într-un fișier separat sau <strong>împărți</strong> un document mare în mai multe fișiere;</li>
+  <li><strong>intercala</strong> paginile de față și de verso scanate separat;</li>
+  <li><strong>decupa</strong> marginile albe sau <strong>încadra</strong> paginile într-un format (de exemplu A4);</li>
+  <li>adăuga <strong>numere de pagină</strong>, <strong>antet / subsol</strong>, <strong>watermark</strong> (de exemplu „CONFIDENȚIAL”) sau o <strong>imagine</strong> (logo, ștampilă).</li>
+</ul>
+
+<div class="callout tip">
+  <span class="title">🔒 Fișierele tale rămân pe calculatorul tău</span>
+  <p>Toate operațiile se fac direct în browser. Documentele <strong>nu sunt trimise</strong> pe internet sau către vreun server, deci poți lucra liniștit și cu acte confidențiale.</p>
+</div>
+
+<div class="callout note">
+  <span class="title">Fișierul original nu se modifică niciodată</span>
+  <p>PageFix lucrează pe o copie. Fișierul de pe calculator rămâne exact cum era. Rezultatul îl obții la final, ca fișier nou, cu butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Descarcă PDF</span> (vezi capitolul <a href="#salvare">Salvarea rezultatului</a>).</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="primii-pasi">
+<h2><span class="chapter-number">2.</span>Primii pași</h2>
+
+<h3>Deschiderea aplicației</h3>
+<p>Deschide browserul și scrie adresa aplicației primită de la departamentul IT (sau dă click pe scurtătura pregătită pentru tine). La pornire, PageFix arată un ecran aproape gol, care te invită să alegi un fișier:</p>
+<figure><a href="img/01-ecran-gol.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/01-ecran-gol.png" width="1440" height="900" alt="Ecranul de pornire: aici „tragi” fișierele sau apeși „alege fișiere”. Legătura de dedesubt deschide acest manual." loading="lazy"></a><figcaption>Ecranul de pornire: aici „tragi” fișierele sau apeși „alege fișiere”. Legătura de dedesubt deschide acest manual.</figcaption></figure>
+
+<h3>Deschiderea primului document – trei variante</h3>
+<p>Alege varianta care ți se pare cea mai comodă. Rezultatul este același.</p>
+
+<h4>Varianta A – cu butonul „alege fișiere”</h4>
+<ol class="steps">
+  <li>Apasă butonul albastru <span class="ui">alege fișiere</span> din mijlocul ecranului (sau butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>Deschide</span> din bara de sus).</li>
+  <li>Se deschide fereastra obișnuită a calculatorului pentru alegerea fișierelor. Mergi în folderul unde se află documentul (de exemplu <em>Documente</em> sau <em>Descărcări</em>).</li>
+  <li>Dă click pe fișier, apoi apasă <strong>Deschidere</strong> (sau <strong>Open</strong>).</li>
+</ol>
+<div class="callout tip">
+  <span class="title">Sfat: poți alege mai multe fișiere deodată</span>
+  <p>În fereastra de alegere, ține apăsată tasta <kbd>Ctrl</kbd> și dă click pe fiecare fișier dorit. Toate vor fi puse unul după altul într-un singur document.</p>
+</div>
+
+<h4>Varianta B – prin tragere („drag &amp; drop”)</h4>
+<ol class="steps">
+  <li>Deschide folderul cu documente (de exemplu cu <em>File Explorer</em> pe Windows sau <em>Finder</em> pe Mac), astfel încât să vezi atât folderul, cât și browserul.</li>
+  <li>Apasă cu mouse-ul pe fișier și <strong>ține apăsat</strong>.</li>
+  <li>Trage fișierul peste fereastra PageFix și dă drumul butonului mouse-ului. Cât timp tragi fișierul deasupra ferestrei, zona de lucru este evidențiată cu un chenar albastru.</li>
+</ol>
+
+<h4>Varianta C – imagini</h4>
+<p>Poți deschide și <strong>fotografii sau imagini</strong> (JPG, PNG, WEBP, GIF și altele). Fiecare imagine devine automat o pagină A4, cu imaginea centrată. Așa poți face rapid un PDF din pozele unor documente făcute cu telefonul.</p>
+
+<p>După deschidere, fiecare pagină a documentului apare ca o <strong>miniatură</strong> (o imagine mică a paginii). Mai departe, totul se face cu un click pe aceste miniaturi și pe butoanele de deasupra.</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="ecranul">
+<h2><span class="chapter-number">3.</span>Cum arată ecranul</h2>
+<p>Cu un document deschis, ecranul are cinci zone. Numerele roșii din imagine corespund explicațiilor de mai jos.</p>
+<figure><a href="img/02-ecran-principal.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/02-ecran-principal.png" width="1440" height="900" alt="Ecranul principal, cu un document de 7 pagini deschis și două pagini selectate." loading="lazy"></a><figcaption>Ecranul principal, cu un document de 7 pagini deschis și două pagini selectate.</figcaption></figure>
+
+<ol class="legend">
+  <li><span class="badge">1</span><strong>Bara de sus</strong> – numele documentului, butoanele de anulare / refacere, deschiderea și adăugarea de fișiere, descărcarea rezultatului, tema, manualul și limba.</li>
+  <li><span class="badge">2</span><strong>Panglica de instrumente</strong> – toate operațiile, grupate pe teme: Selecție, Rotire, Pagini, Format pagină, Suprapuneri.</li>
+  <li><span class="badge">3</span><strong>Zona paginilor</strong> – câte o miniatură pentru fiecare pagină, în ordinea din document.</li>
+  <li><span class="badge">4</span><strong>Butoanele fiecărei pagini</strong> – acțiuni rapide doar pentru pagina respectivă.</li>
+  <li><span class="badge">5</span><strong>Bara de stare</strong> – câte pagini are documentul, câte sunt selectate, sfaturi scurte și glisorul pentru mărimea miniaturilor.</li>
+</ol>
+
+<h3 id="bara-sus">3.1. Bara de sus</h3>
+<figure><a href="img/03-bara-sus.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/03-bara-sus.png" width="1440" height="52" alt="Bara de sus." loading="lazy"></a><figcaption>Bara de sus.</figcaption></figure>
+<table>
+  <tr><th style="width:34%">Element</th><th>Ce face</th></tr>
+  <tr><td><strong>PageFix v0.7.0</strong> (sigla)</td><td>Click pe ea deschide fereastra „Despre” (versiune, autor, contact).</td></tr>
+  <tr><td>Numele documentului</td><td>Numele cu care se va descărca fișierul. Dă click pe el ca să-l schimbi (vezi <a href="#salvare">Salvarea rezultatului</a>).</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg></span> și <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-redo"/></svg></span></td><td><strong>Anulează</strong> ultima operație, respectiv o <strong>reface</strong>. Vezi <a href="#anulare">Anularea greșelilor</a>.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>Deschide</span></td><td>Deschide alt document <strong>în locul</strong> celui curent.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Adaugă fișiere</span></td><td>Adaugă alte PDF-uri sau imagini <strong>la finalul</strong> documentului curent (combinare).</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Descarcă PDF</span></td><td>Creează fișierul rezultat și îl salvează pe calculator.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></span></td><td>Închide documentul (fără să-l salveze).</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></span> / <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg></span></td><td>Comută între tema luminoasă și cea întunecată.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg></span></td><td>Deschide acest <strong>manual de utilizare</strong>, într-o filă nouă (la fel ca tasta <kbd>F1</kbd>).</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>EN</span></td><td>Schimbă limba aplicației (română ↔ engleză).</td></tr>
+</table>
+
+<h3 id="panglica">3.2. Panglica de instrumente</h3>
+<figure><a href="img/04-panglica.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/04-panglica.png" width="1440" height="98" alt="Panglica de instrumente, cu cele cinci grupuri." loading="lazy"></a><figcaption>Panglica de instrumente, cu cele cinci grupuri.</figcaption></figure>
+<table>
+  <tr><th style="width:22%">Grup</th><th style="width:30%">Butoane</th><th>La ce folosesc</th></tr>
+  <tr><td><strong>Selecție</strong></td><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-select"/></svg>Selectează ▾</span></td><td>Alegerea rapidă a paginilor: toate, niciuna, pare, impare, un interval. Bulina albastră arată câte pagini sunt selectate.</td></tr>
+  <tr><td><strong>Rotire</strong></td><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotl"/></svg>Stânga</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotr"/></svg>Dreapta</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rot180"/></svg>180°</span></td><td>Rotesc paginile selectate. Butoanele apar estompate cât timp nu e selectată nicio pagină.</td></tr>
+  <tr><td><strong>Pagini</strong></td><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-insert"/></svg>Inserează</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>Șterge</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-extract"/></svg>Extrage</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-split"/></svg>Împarte</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-interleave"/></svg>Intercalează</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-reverse"/></svg>Inversează</span></td><td>Adăugarea, ștergerea, salvarea separată, împărțirea și reordonarea paginilor.</td></tr>
+  <tr><td><strong>Format pagină</strong></td><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-crop"/></svg>Decupează</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-fit"/></svg>Încadrează</span></td><td>Tăierea marginilor și aducerea paginilor la un format standard (A4 etc.).</td></tr>
+  <tr><td><strong>Suprapuneri</strong></td><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-hash"/></svg>Numerotare</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-header"/></svg>Antet/subsol</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-stamp"/></svg>Watermark</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg>Imagine</span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Straturi</span></td><td>Adăugarea de texte și imagini peste pagini și lista lor.</td></tr>
+</table>
+<div class="callout tip">
+  <span class="title">Sfat: ține mouse-ul nemișcat peste un buton</span>
+  <p>După o secundă apare o scurtă explicație a butonului. Funcționează pentru aproape toate butoanele din aplicație.</p>
+</div>
+
+<h3 id="miniatura">3.3. Miniatura unei pagini</h3>
+<figure class="small"><a href="img/05-card.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/05-card.png" width="218" height="295" alt="O pagină din document, cu butoanele ei." loading="lazy"></a><figcaption>O pagină din document, cu butoanele ei.</figcaption></figure>
+<ul>
+  <li><strong>Căsuța din colțul stânga-sus</strong> – bifeaz-o ca să selectezi pagina (sau scoate bifa ca s-o deselectezi).</li>
+  <li><strong>„Pagina 5”</strong> – poziția paginii în documentul pe care îl construiești.</li>
+  <li><strong>Textul mic de dedesubt</strong> – de unde provine pagina: numele fișierului și numărul paginii în acel fișier (de exemplu „Raport_activitate_2026.pdf · p. 5”). E util când combini mai multe fișiere.</li>
+  <li><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotl"/></svg></span> și <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotr"/></svg></span> – rotesc doar această pagină, cu 90° spre stânga sau spre dreapta.</li>
+  <li><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></span> – deschide un meniu cu mai multe acțiuni pentru această pagină (vezi <a href="#ordine">capitolul 8</a>).</li>
+  <li><span class="ui">Elimină</span> – scoate pagina din document.</li>
+</ul>
+<p>Dacă ții mouse-ul nemișcat peste imaginea paginii, apare mărimea ei în milimetri (de exemplu „210 × 297 mm” pentru o pagină A4).</p>
+
+<h3 id="bara-stare">3.4. Bara de stare (jos)</h3>
+<figure><a href="img/25-bara-stare.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/25-bara-stare.png" width="1440" height="30" alt="Bara de stare." loading="lazy"></a><figcaption>Bara de stare.</figcaption></figure>
+<ul>
+  <li>În stânga: <strong>numărul de pagini</strong> al documentului și câte pagini sunt <strong>selectate</strong>.</li>
+  <li>La mijloc: un rând cu <strong>sfaturi</strong> de folosire.</li>
+  <li>Glisorul cu iconița <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg></span> schimbă <strong>mărimea miniaturilor</strong> (vezi <a href="#personalizare">capitolul 21</a>).</li>
+  <li>În dreapta: versiunea aplicației și datele autorului.</li>
+</ul>
+
+<h3 id="mesaje-ecran">3.5. Mesajele aplicației</h3>
+<p>După fiecare operație, în colțul din dreapta-jos apare pentru câteva secunde un mesaj scurt, de exemplu „Adăugate 7 pagini.”. Culoarea benzii din stânga mesajului îți spune ce s-a întâmplat:</p>
+<ul>
+  <li><strong>verde</strong> – operația a reușit;</li>
+  <li><strong>galben</strong> – un avertisment (de exemplu „Selectează mai întâi una sau mai multe pagini.”);</li>
+  <li><strong>roșu</strong> – o eroare: operația nu s-a făcut. Citește mesajul, el îți spune ce trebuie corectat.</li>
+</ul>
+<p>Când o operație durează mai mult (fișiere mari), ecranul se estompează și apare mesajul <strong>„Se lucrează…”</strong>. Așteaptă până dispare.</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="deschidere">
+<h2><span class="chapter-number">4.</span>Deschiderea și combinarea fișierelor</h2>
+
+<h3>Ce fișiere poți folosi</h3>
+<ul>
+  <li><strong>Documente PDF</strong> (extensia <code>.pdf</code>);</li>
+  <li><strong>Imagini</strong>: JPG / JPEG, PNG, WEBP, GIF, BMP, AVIF. Fiecare imagine devine o pagină A4.</li>
+</ul>
+<p>Alte tipuri de fișiere (Word, Excel etc.) sunt ignorate. Dacă alegi doar astfel de fișiere, apare mesajul „Nu am găsit fișiere PDF sau imagini.”.</p>
+
+<h3>„Deschide” sau „Adaugă fișiere”?</h3>
+<table>
+  <tr><th style="width:30%">Buton</th><th>Ce se întâmplă</th></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>Deschide</span></td><td>Documentul curent se închide și în locul lui apare documentul ales. Dacă ai modificări nedescărcate, aplicația te întreabă mai întâi dacă vrei să continui.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Adaugă fișiere</span></td><td>Paginile fișierelor alese se adaugă <strong>la finalul</strong> documentului curent. Așa combini mai multe documente într-unul singur.</td></tr>
+</table>
+
+<h3>Combinarea mai multor documente – exemplu</h3>
+<p>Vrei să faci un singur PDF din „Cerere.pdf”, „Copie buletin.jpg” și „Adeverință.pdf”:</p>
+<ol class="steps">
+  <li>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>Deschide</span> și alege „Cerere.pdf”.</li>
+  <li>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Adaugă fișiere</span> și alege „Copie buletin.jpg”.</li>
+  <li>Apasă din nou <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Adaugă fișiere</span> și alege „Adeverință.pdf”.</li>
+  <li>Verifică ordinea paginilor; dacă trebuie, mută-le prin tragere (vezi <a href="#ordine">capitolul 8</a>).</li>
+  <li>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Descarcă PDF</span>.</li>
+</ol>
+
+<h3>Adăugarea prin tragere, la un anumit loc</h3>
+<p>Dacă tragi un fișier din calculator <strong>direct între miniaturi</strong>, apare o linie albastră verticală care arată unde vor fi puse paginile noi. Dă drumul mouse-ului când linia e în locul dorit. Dacă tragi fișierul în altă parte a ferestrei, paginile se adaugă la final.</p>
+
+<h3>Documente protejate cu parolă</h3>
+<p>Dacă un PDF are parolă de deschidere, aplicația îți cere parola într-o fereastră mică. Scrie parola și apasă <strong>OK</strong>. Dacă parola e greșită, ți se cere din nou. Dacă apeși <strong>Anulează</strong>, fișierul nu se deschide.</p>
+<div class="callout warn">
+  <span class="title">Atenție la documentele „criptate”</span>
+  <p>Unele PDF-uri au restricții de modificare (de exemplu, unele documente emise de instituții). Le poți vedea, dar aplicația afișează avertismentul „… este criptat. Vizualizarea merge, dar paginile salvate pot ieși goale sau corupte.”. Verifică întotdeauna rezultatul descărcat. Dacă iese greșit, cere emitentului o versiune fără restricții.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="selectie">
+<h2><span class="chapter-number">5.</span>Selectarea paginilor</h2>
+<p>Multe operații (rotire, decupare, ștergere…) se aplică <strong>paginilor selectate</strong>. O pagină selectată are chenar albastru și bifă în căsuța din colț. În bara de stare vezi câte pagini sunt selectate.</p>
+
+<h3>Cu mouse-ul</h3>
+<table>
+  <tr><th style="width:38%">Ce faci</th><th>Rezultat</th></tr>
+  <tr><td><strong>Click</strong> pe o pagină</td><td>Se selectează doar acea pagină (celelalte se deselectează).</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + <strong>click</strong> pe o pagină</td><td>Pagina se adaugă la selecție sau, dacă era deja selectată, se scoate din selecție.</td></tr>
+  <tr><td><kbd>Shift</kbd> + <strong>click</strong> pe o pagină</td><td>Se selectează toate paginile dintre ultima pagină pe care ai dat click și aceasta. Exemplu: click pe pagina 2, apoi <kbd>Shift</kbd> + click pe pagina 6 → se selectează paginile 2, 3, 4, 5 și 6.</td></tr>
+  <tr><td>Click pe <strong>căsuța</strong> din colțul paginii</td><td>Bifează / debifează pagina, fără să le afecteze pe celelalte.</td></tr>
+  <tr><td>Click pe <strong>spațiul gol</strong> dintre pagini</td><td>Se anulează selecția.</td></tr>
+</table>
+
+<h3>Cu meniul „Selectează”</h3>
+<p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-select"/></svg>Selectează ▾</span> din panglică:</p>
+<figure class="small"><a href="img/07-meniu-selectie.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/07-meniu-selectie.png" width="420" height="316" alt="Meniul „Selectează”." loading="lazy"></a><figcaption>Meniul „Selectează”.</figcaption></figure>
+<ul>
+  <li><strong>Toate paginile</strong> (sau tastele <kbd>Ctrl</kbd> + <kbd>A</kbd>);</li>
+  <li><strong>Niciuna</strong> (sau tasta <kbd>Esc</kbd>);</li>
+  <li><strong>Paginile impare</strong> (1, 3, 5…) și <strong>Paginile pare</strong> (2, 4, 6…);</li>
+  <li><strong>Inversează selecția</strong> – selectează paginile neselectate și le deselectează pe celelalte;</li>
+  <li><strong>Interval…</strong> – scrii numerele paginilor dorite:</li>
+</ul>
+<figure class="small"><a href="img/09-dialog-interval.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/09-dialog-interval.png" width="440" height="220" alt="Selectarea paginilor 2, 5, 6 și 7." loading="lazy"></a><figcaption>Selectarea paginilor 2, 5, 6 și 7.</figcaption></figure>
+<p>Scrie paginile (vezi <a href="#intervale">capitolul 6</a>) și apasă <span class="ui">Selectează</span>. Dacă bifezi „adaugă la selecția existentă”, paginile se adaugă la cele deja selectate.</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="intervale">
+<h2><span class="chapter-number">6.</span>Cum scrii un interval de pagini</h2>
+<p>În mai multe ferestre ți se cer „paginile” sub formă de text. Regulile sunt aceleași peste tot:</p>
+<table>
+  <tr><th style="width:26%">Scrii</th><th>Înseamnă</th></tr>
+  <tr><td><code>5</code></td><td>doar pagina 5</td></tr>
+  <tr><td><code>2, 5, 9</code></td><td>paginile 2, 5 și 9 (separate prin virgulă)</td></tr>
+  <tr><td><code>5-8</code></td><td>paginile 5, 6, 7 și 8</td></tr>
+  <tr><td><code>10-</code></td><td>de la pagina 10 până la ultima pagină</td></tr>
+  <tr><td><code>-3</code></td><td>de la prima pagină până la pagina 3</td></tr>
+  <tr><td><code>8-5</code></td><td>paginile 8, 7, 6 și 5, în această ordine (invers)</td></tr>
+  <tr><td><code>1-3, 7, 10-</code></td><td>poți combina: paginile 1, 2, 3, 7 și de la 10 până la final</td></tr>
+</table>
+<div class="callout note">
+  <span class="title">Bine de știut</span>
+  <ul>
+    <li>Numerele se referă la poziția din documentul afișat în PageFix („Pagina 1”, „Pagina 2”… de sub miniaturi), nu la numerele tipărite pe pagini.</li>
+    <li>O pagină scrisă de două ori este luată o singură dată.</li>
+    <li>Dacă scrii o pagină care nu există, apare un mesaj de felul „Pagina 12 nu există (documentul are 7 pagini).”, iar fereastra rămâne deschisă ca să corectezi.</li>
+    <li>Nu lăsa spații în jurul liniuței: scrie <code>5-8</code>, nu <code>5 - 8</code>.</li>
+  </ul>
+</div>
+<p>La <a href="#impartire">Împărțire</a> poți scrie mai multe grupuri, separate prin punct și virgulă (<code>;</code>). Fiecare grup devine un fișier separat. Exemplu: <code>1-3; 4-10; 11-</code>.</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="rotire">
+<h2><span class="chapter-number">7.</span>Rotirea paginilor</h2>
+<p>Paginile scanate apar uneori culcate sau cu susul în jos. Le poți îndrepta în două feluri.</p>
+
+<h3>O singură pagină</h3>
+<p>Folosește butoanele de sub miniatură: <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotl"/></svg></span> o rotește 90° spre stânga, <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotr"/></svg></span> 90° spre dreapta. Pentru 180° apasă de două ori sau alege „Rotește 180°” din meniul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></span>.</p>
+
+<h3>Mai multe pagini deodată</h3>
+<ol class="steps">
+  <li>Selectează paginile (vezi <a href="#selectie">capitolul 5</a>).</li>
+  <li>Apasă în panglică <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotl"/></svg>Stânga</span>, <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotr"/></svg>Dreapta</span> sau <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rot180"/></svg>180°</span>.</li>
+</ol>
+<p>Dacă nu ai selectat nicio pagină, apare mesajul „Selectează mai întâi una sau mai multe pagini.”.</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="ordine">
+<h2><span class="chapter-number">8.</span>Schimbarea ordinii paginilor</h2>
+
+<h3>Mutarea prin tragere</h3>
+<ol class="steps">
+  <li>Apasă pe miniatura paginii și ține butonul mouse-ului apăsat.</li>
+  <li>Trage pagina în locul dorit. O linie albastră verticală arată unde va ajunge.</li>
+  <li>Dă drumul butonului mouse-ului.</li>
+</ol>
+<figure><a href="img/06-tragere.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/06-tragere.png" width="1440" height="330" alt="Mutarea paginilor 2 și 3 (estompate) înaintea paginii 6 – linia albastră arată locul." loading="lazy"></a><figcaption>Mutarea paginilor 2 și 3 (estompate) înaintea paginii 6 – linia albastră arată locul.</figcaption></figure>
+<div class="callout tip">
+  <span class="title">Sfat: mută mai multe pagini deodată</span>
+  <p>Selectează mai întâi paginile, apoi trage una dintre ele. Toate paginile selectate se mută împreună, în ordinea lor, iar lângă cursor apare „2 pagini”, „3 pagini”…</p>
+</div>
+
+<h3>Inversarea ordinii</h3>
+<p>Butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-reverse"/></svg>Inversează</span> întoarce ordinea paginilor, ca la scanările făcute de la ultima pagină la prima:</p>
+<ul>
+  <li>dacă ai selectat <strong>cel puțin două pagini</strong>, se inversează doar ordinea lor (rămân pe aceleași poziții, dar în ordine inversă);</li>
+  <li>altfel se inversează <strong>tot documentul</strong>.</li>
+</ul>
+
+<h3>Meniul unei pagini <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></span></h3>
+<p>Butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></span> de sub fiecare miniatură deschide un meniu cu acțiuni pentru acea pagină:</p>
+<figure class="small"><a href="img/08-meniu-pagina.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/08-meniu-pagina.png" width="351" height="615" alt="Meniul unei pagini." loading="lazy"></a><figcaption>Meniul unei pagini.</figcaption></figure>
+<table>
+  <tr><th style="width:38%">Opțiune</th><th>Ce face</th></tr>
+  <tr><td>Previzualizare</td><td>Deschide pagina mare (vezi <a href="#previzualizare">capitolul 18</a>).</td></tr>
+  <tr><td>Rotește 180°</td><td>Întoarce pagina cu susul în jos.</td></tr>
+  <tr><td>Duplică pagina</td><td>Pune o copie a paginii imediat după ea.</td></tr>
+  <tr><td>Inserează pagină albă după / pagini din PDF după… / imagine după…</td><td>Deschide fereastra de inserare, cu poziția deja completată (după această pagină). Vezi <a href="#inserare">capitolul 10</a>.</td></tr>
+  <tr><td>Extrage pagina ca PDF</td><td>Descarcă doar această pagină, ca fișier separat.</td></tr>
+  <tr><td>Decupează pagina… / Încadrează pagina în format…</td><td>Deschide fereastra de format, doar pentru această pagină. Vezi capitolele <a href="#decupare">14</a> și <a href="#incadrare">15</a>.</td></tr>
+</table>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="stergere">
+<h2><span class="chapter-number">9.</span>Ștergerea paginilor</h2>
+
+<h3>Rapid</h3>
+<ul>
+  <li>butonul <span class="ui">Elimină</span> de sub o pagină o scoate imediat din document;</li>
+  <li>tasta <kbd>Delete</kbd> (sau <kbd>Del</kbd>) șterge toate paginile selectate.</li>
+</ul>
+
+<h3>Cu fereastra „Ștergere pagini”</h3>
+<p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>Șterge</span> din panglică. Alegi ce se șterge:</p>
+<figure class="small"><a href="img/13-dialog-stergere.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/13-dialog-stergere.png" width="440" height="224" alt="Fereastra „Ștergere pagini”." loading="lazy"></a><figcaption>Fereastra „Ștergere pagini”.</figcaption></figure>
+<ul>
+  <li><strong>paginile selectate</strong> (între paranteze vezi câte sunt);</li>
+  <li><strong>intervalul</strong> – scrii paginile (de exemplu <code>2, 5-8</code>);</li>
+  <li><strong>toate paginile pare</strong> sau <strong>toate paginile impare</strong> – util, de exemplu, pentru eliminarea versourilor goale dintr-o scanare.</li>
+</ul>
+<p>Apasă butonul roșu <span class="ui">Șterge</span>. Dacă alegerea ar șterge toate paginile, aplicația îți cere mai întâi confirmarea.</p>
+<div class="callout tip">
+  <span class="title">Ai șters din greșeală?</span>
+  <p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg></span> din bara de sus sau tastele <kbd>Ctrl</kbd> + <kbd>Z</kbd>. Pagina revine la locul ei.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="inserare">
+<h2><span class="chapter-number">10.</span>Inserarea de pagini</h2>
+<p>Butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-insert"/></svg>Inserează</span> deschide o fereastră cu trei file (taburi): <strong>Pagină albă</strong>, <strong>Pagini din alt PDF</strong> și <strong>Imagine ca pagină</strong>. În partea de jos alegi <strong>poziția</strong> la care se pun paginile noi.</p>
+
+<h3>Poziția</h3>
+<table>
+  <tr><th style="width:30%">Opțiune</th><th>Paginile noi se pun…</th></tr>
+  <tr><td>după pagina [număr]</td><td>imediat după pagina cu numărul scris alături</td></tr>
+  <tr><td>înainte de pagina [număr]</td><td>imediat înaintea paginii cu numărul scris alături</td></tr>
+  <tr><td>la început</td><td>înaintea primei pagini</td></tr>
+  <tr><td>la final</td><td>după ultima pagină</td></tr>
+</table>
+<p>Implicit, fereastra propune poziția „după” ultima pagină selectată (sau după ultima pagină a documentului, dacă nu e nimic selectat).</p>
+
+<h3>Pagini albe</h3>
+<figure class="medium"><a href="img/10-dialog-inserare-alba.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/10-dialog-inserare-alba.png" width="600" height="294" alt="Inserarea unei pagini albe A4." loading="lazy"></a><figcaption>Inserarea unei pagini albe A4.</figcaption></figure>
+<ol class="steps">
+  <li>Rămâi pe fila <strong>Pagină albă</strong>.</li>
+  <li>La <strong>Format</strong> alege mărimea: „ca pagina de referință” (aceeași mărime ca pagina lângă care inserezi), A4 portret, A4 peisaj, A3, A5 sau Letter.</li>
+  <li>La <strong>Număr de pagini</strong> scrie câte pagini albe vrei (între 1 și 500).</li>
+  <li>Alege poziția și apasă <span class="ui">Inserează</span>.</li>
+</ol>
+
+<h3>Pagini din alt PDF</h3>
+<figure class="medium"><a href="img/11-dialog-inserare-pdf.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/11-dialog-inserare-pdf.png" width="600" height="356" alt="Inserarea primelor două pagini din alt PDF, la finalul documentului." loading="lazy"></a><figcaption>Inserarea primelor două pagini din alt PDF, la finalul documentului.</figcaption></figure>
+<ol class="steps">
+  <li>Treci pe fila <strong>Pagini din alt PDF</strong>.</li>
+  <li>La <strong>Fișier PDF</strong> apasă butonul de alegere și selectează fișierul.</li>
+  <li>La <strong>Pagini din acel fișier</strong> scrie ce pagini vrei (de exemplu <code>1-3, 7</code>). Lasă câmpul gol ca să le iei pe toate.</li>
+  <li>Alege poziția și apasă <span class="ui">Inserează</span>.</li>
+</ol>
+
+<h3>Imagini ca pagini</h3>
+<figure class="medium"><a href="img/12-dialog-inserare-imagine.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/12-dialog-inserare-imagine.png" width="600" height="358" alt="Inserarea unei fotografii ca pagină A4." loading="lazy"></a><figcaption>Inserarea unei fotografii ca pagină A4.</figcaption></figure>
+<ol class="steps">
+  <li>Treci pe fila <strong>Imagine ca pagină</strong>.</li>
+  <li>Alege una sau mai multe imagini. Fiecare imagine devine o pagină.</li>
+  <li>La <strong>Mărimea paginii</strong> alege:
+    <ul>
+      <li><strong>A4 (orientare automată)</strong> – pagina A4 se întoarce singură în peisaj pentru imaginile late;</li>
+      <li><strong>exact cât imaginea</strong> – pagina are mărimea imaginii, fără margini;</li>
+      <li><strong>ca pagina de referință</strong> – aceeași mărime ca pagina lângă care inserezi.</li>
+    </ul>
+  </li>
+  <li>La <strong>Margine (mm)</strong> alegi spațiul alb din jurul imaginii (implicit 10 mm).</li>
+  <li>Alege poziția și apasă <span class="ui">Inserează</span>.</li>
+</ol>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="extragere">
+<h2><span class="chapter-number">11.</span>Extragerea paginilor într-un PDF nou</h2>
+<p>Extragerea salvează <strong>doar anumite pagini</strong> într-un fișier nou. Documentul la care lucrezi rămâne neschimbat (dacă nu alegi altfel).</p>
+<figure class="small"><a href="img/14-dialog-extragere.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/14-dialog-extragere.png" width="440" height="254" alt="Extragerea paginilor 5 și 6 într-un fișier separat." loading="lazy"></a><figcaption>Extragerea paginilor 5 și 6 într-un fișier separat.</figcaption></figure>
+<ol class="steps">
+  <li>(Opțional) selectează paginile dorite – fereastra le va completa singură.</li>
+  <li>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-extract"/></svg>Extrage</span> din panglică.</li>
+  <li>La <strong>Pagini</strong> verifică sau scrie paginile (de exemplu <code>5-6</code>).</li>
+  <li>La <strong>Nume fișier</strong> scrie numele noului fișier (fără „.pdf”, se adaugă singur).</li>
+  <li>Bifează „elimină apoi aceste pagini din documentul curent” doar dacă vrei să le și scoți din document după extragere.</li>
+  <li>Apasă <span class="ui">Extrage și descarcă</span>. Fișierul se salvează în folderul de descărcări.</li>
+</ol>
+<p>Pentru o singură pagină e mai rapid: meniul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></span> al paginii → <strong>Extrage pagina ca PDF</strong>.</p>
+<div class="callout note">
+  <span class="title">Bine de știut</span>
+  <p>Paginile extrase păstrează rotirile, decupările și suprapunerile (numere, antet, watermark…) pe care le-ai făcut.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="impartire">
+<h2><span class="chapter-number">12.</span>Împărțirea documentului</h2>
+<p><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-split"/></svg>Împarte</span> transformă documentul în <strong>mai multe fișiere PDF</strong>, puse toate într-o arhivă ZIP (un singur fișier care le conține pe toate).</p>
+<figure class="small"><a href="img/15-dialog-impartire.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/15-dialog-impartire.png" width="440" height="352" alt="Împărțirea în trei fișiere: paginile 1-2, 3-5 și de la 6 până la final." loading="lazy"></a><figcaption>Împărțirea în trei fișiere: paginile 1-2, 3-5 și de la 6 până la final.</figcaption></figure>
+<h3>Moduri de împărțire</h3>
+<ul>
+  <li><strong>câte un fișier pentru fiecare pagină</strong> – un document de 10 pagini devine 10 fișiere;</li>
+  <li><strong>câte [N] pagini per fișier</strong> – de exemplu câte 2: paginile 1-2, 3-4, 5-6…;</li>
+  <li><strong>pe intervale</strong> – scrii grupurile separate prin <code>;</code>, de exemplu <code>1-3; 4,6,8; 9-</code>. Fiecare grup devine un fișier.</li>
+</ul>
+<p>La <strong>Prefix nume fișiere</strong> scrii începutul numelui fișierelor. Ele se vor numi, de exemplu, <code>Raport_1_p1-2.pdf</code>, <code>Raport_2_p3-5.pdf</code>… (prefixul, numărul fișierului și paginile conținute). Arhiva se numește <code>Raport_impartit.zip</code>.</p>
+<p>Apasă <span class="ui">Împarte și descarcă</span>.</p>
+
+<h3>Cum deschid arhiva ZIP</h3>
+<ul>
+  <li><strong>Windows</strong>: dă click dreapta pe fișierul ZIP din folderul de descărcări → <strong>Extragere totală…</strong> (Extract All…) → <strong>Extragere</strong>. Se creează un folder cu toate fișierele PDF.</li>
+  <li><strong>Mac</strong>: dă dublu-click pe fișierul ZIP; se creează automat un folder cu fișierele.</li>
+</ul>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="intercalare">
+<h2><span class="chapter-number">13.</span>Intercalarea (scanări față / verso)</h2>
+<p>Multe imprimante scanează doar pe o parte. Pentru un document tipărit față-verso scanezi întâi toate fețele, apoi întorci teancul și scanezi versourile. Rezultă două fișiere, iar <strong>Intercalarea</strong> le îmbină în ordinea corectă: față 1, verso 1, față 2, verso 2…</p>
+<figure class="small"><a href="img/16-dialog-intercalare.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/16-dialog-intercalare.png" width="440" height="282" alt="Intercalarea cu fișierul de versouri, scanat în ordine inversă." loading="lazy"></a><figcaption>Intercalarea cu fișierul de versouri, scanat în ordine inversă.</figcaption></figure>
+<ol class="steps">
+  <li>Deschide fișierul cu <strong>fețele</strong> (de exemplu „Scanare_fata.pdf”).</li>
+  <li>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-interleave"/></svg>Intercalează</span>.</li>
+  <li>La <strong>Fișier PDF</strong> alege fișierul cu <strong>versourile</strong>.</li>
+  <li>Dacă ai întors teancul și versourile au ieșit de la ultima la prima (cazul obișnuit), bifează „ia paginile fișierului nou în ordine inversă”.</li>
+  <li>Bifează „începe cu pagina din fișierul nou” doar dacă documentul trebuie să înceapă cu o pagină din al doilea fișier.</li>
+  <li>Apasă <span class="ui">Intercalează</span> și verifică rezultatul în miniaturi.</li>
+</ol>
+<div class="callout note">
+  <span class="title">Exemplu</span>
+  <p>Fețe: F1, F2, F3. Versouri scanate invers: V3, V2, V1. Cu bifa „ordine inversă”, rezultatul este: <strong>F1, V1, F2, V2, F3, V3</strong>.</p>
+  <p>Dacă cele două fișiere au număr diferit de pagini, paginile rămase se pun la final și apare un avertisment.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="decupare">
+<h2><span class="chapter-number">14.</span>Decuparea marginilor</h2>
+<p><strong>Decuparea</strong> ascunde marginile unei pagini, de exemplu marginile negre sau prea late de la o scanare. Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-crop"/></svg>Decupează</span>. Fereastra arată prima pagină selectată (sau prima pagină a documentului).</p>
+<figure><a href="img/17-dialog-decupare.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/17-dialog-decupare.png" width="900" height="702" alt="Decuparea: dreptunghiul albastru este zona care rămâne vizibilă." loading="lazy"></a><figcaption>Decuparea: dreptunghiul albastru este zona care rămâne vizibilă.</figcaption></figure>
+
+<h3>Varianta 1 – desenezi cu mouse-ul</h3>
+<ol class="steps">
+  <li>Pe imaginea paginii, apasă în colțul stânga-sus al zonei pe care vrei s-o <strong>păstrezi</strong> și trage până în colțul dreapta-jos. Apare un dreptunghi albastru.</li>
+  <li>Ajustează dreptunghiul: trage de pătrățelele din colțuri ca să-l mărești sau micșorezi, ori trage din interiorul lui ca să-l muți.</li>
+  <li>Câmpurile <strong>Sus / Jos / Stânga / Dreapta (mm)</strong> se completează automat.</li>
+</ol>
+
+<h3>Varianta 2 – scrii marginile</h3>
+<p>Scrie direct în câmpurile <strong>Sus</strong>, <strong>Jos</strong>, <strong>Stânga</strong>, <strong>Dreapta</strong> câți milimetri vrei să tai de pe fiecare latură. Dreptunghiul se actualizează pe imagine.</p>
+
+<h3>La ce pagini se aplică</h3>
+<p>În chenarul <strong>Se aplică la</strong> alegi: <strong>paginile selectate</strong>, <strong>toate paginile</strong> sau un <strong>interval</strong> (scris în câmpul alăturat). Aceleași margini se aplică tuturor paginilor alese. La final apasă <span class="ui">Aplică</span>.</p>
+
+<div class="callout tip">
+  <span class="title">Decuparea nu pierde nimic</span>
+  <p>Marginile doar se ascund, conținutul rămâne în fișier, iar linkurile continuă să funcționeze. Butonul <span class="ui">Anulează decupările existente (la paginile alese)</span> readuce paginile alese la mărimea lor inițială.</p>
+</div>
+<div class="callout note">
+  <span class="title">Mesaje posibile</span>
+  <ul>
+    <li>„Toate marginile sunt 0…” – nu ai desenat un dreptunghi și nu ai scris nicio margine.</li>
+    <li>„Marginile sunt prea mari pentru pagina…” – din pagină n-ar mai rămâne aproape nimic; micșorează marginile.</li>
+  </ul>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="incadrare">
+<h2><span class="chapter-number">15.</span>Încadrarea într-un format</h2>
+<p><strong>Încadrarea</strong> aduce paginile de mărimi diferite la același format (de exemplu A4), ca documentul să se tipărească frumos. Conținutul fiecărei pagini este micșorat sau mărit proporțional și centrat pe pagina nouă.</p>
+<p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-fit"/></svg>Încadrează</span> (sau fila <strong>Încadrare în format</strong> din fereastra de decupare).</p>
+<figure><a href="img/18-dialog-incadrare.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/18-dialog-incadrare.png" width="900" height="702" alt="Încadrarea paginilor în A4, cu margine de 10 mm." loading="lazy"></a><figcaption>Încadrarea paginilor în A4, cu margine de 10 mm.</figcaption></figure>
+<table>
+  <tr><th style="width:30%">Câmp</th><th>Ce alegi</th></tr>
+  <tr><td>Format</td><td>A4, A3, A5, Letter sau Legal.</td></tr>
+  <tr><td>Orientare</td><td><strong>automată</strong> (peisaj pentru paginile late, portret pentru celelalte), <strong>portret</strong> (în picioare) sau <strong>peisaj</strong> (culcat).</td></tr>
+  <tr><td>Margine (mm)</td><td>Spațiul alb lăsat pe margini.</td></tr>
+  <tr><td>nu mări paginile mai mici</td><td>Bifat: paginile mai mici decât formatul ales rămân la mărimea lor (doar centrate), nu se măresc.</td></tr>
+  <tr><td>Se aplică la</td><td>paginile selectate, toate paginile sau un interval.</td></tr>
+</table>
+<div class="callout warn">
+  <span class="title">Atenție</span>
+  <p>După încadrare, <strong>linkurile și câmpurile de formular</strong> de pe paginile respective nu mai funcționează. Dacă vrei doar să scapi de margini, folosește <a href="#decupare">Decuparea</a>, care le păstrează.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="suprapuneri">
+<h2><span class="chapter-number">16.</span>Suprapuneri: numere, antet, watermark, imagine</h2>
+<p><strong>Suprapunerile</strong> (numite și <strong>straturi</strong>) sunt texte sau imagini adăugate <strong>peste</strong> pagini: numere de pagină, un antet sau un subsol, un watermark sau o ștampilă.</p>
+<div class="callout tip">
+  <span class="title">Le poți schimba oricând</span>
+  <p>Suprapunerile nu modifică paginile până la descărcare. Le vezi imediat pe miniaturi, dar le poți edita, ascunde sau șterge oricând din <a href="#straturi">panoul Straturi</a>. Dacă ștergi sau muți pagini, numerotarea se recalculează singură.</p>
+</div>
+
+<h3>Câmpuri comune</h3>
+<p>Toate ferestrele de suprapunere au o parte <strong>Aspect</strong> și o parte <strong>Se aplică la</strong>. Fiecare fereastră arată doar câmpurile potrivite tipului ei (de exemplu, la watermark nu există „Poziție”, iar la imagine nu există „Culoare”):</p>
+<table>
+  <tr><th style="width:28%">Câmp</th><th>Ce înseamnă</th></tr>
+  <tr><td>Poziție</td><td>Locul pe pagină, din cele 9 poziții de mai jos.</td></tr>
+  <tr><td>Margine (mm)</td><td>Distanța față de marginea paginii.</td></tr>
+  <tr><td>Mărime font (pt)</td><td>Mărimea textului. 10–12 este mărimea obișnuită a unui text tipărit.</td></tr>
+  <tr><td>Culoare</td><td>Click pe pătrățelul colorat ca să alegi culoarea textului.</td></tr>
+  <tr><td>îngroșat</td><td>Text îngroșat (bold).</td></tr>
+  <tr><td>Se aplică la</td><td>toate paginile, paginile selectate sau un interval (de exemplu <code>2-</code> = toate, mai puțin prima).</td></tr>
+</table>
+<p>Cele 9 poziții posibile pe pagină:</p>
+<div class="position-grid" role="img" aria-label="Pozițiile pe pagină">
+  <div>sus stânga</div><div>sus centru</div><div>sus dreapta</div>
+  <div>mijloc stânga</div><div>centru</div><div>mijloc dreapta</div>
+  <div>jos stânga</div><div>jos centru</div><div>jos dreapta</div>
+</div>
+
+<h3 id="numerotare">16.1. Numerotarea paginilor</h3>
+<p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-hash"/></svg>Numerotare</span>.</p>
+<figure class="medium"><a href="img/19-dialog-numerotare.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/19-dialog-numerotare.png" width="600" height="410" alt="Numerotare „Pagina 1 din 10”, jos la centru, fără numărul pe prima pagină." loading="lazy"></a><figcaption>Numerotare „Pagina 1 din 10”, jos la centru, fără numărul pe prima pagină.</figcaption></figure>
+<ol class="steps">
+  <li>La <strong>Format</strong> alege cum arată numărul: „1”, „1 / 10”, „Pagina 1”, „Pagina 1 din 10” sau „- 1 -”.</li>
+  <li>La <strong>Începe cu numărul</strong> scrie primul număr (de obicei 1).</li>
+  <li>Bifează „nu numerota prima pagină” dacă prima pagină este o copertă. Numărarea începe atunci de la a doua pagină.</li>
+  <li>Alege poziția (de obicei „jos centru”), mărimea și culoarea.</li>
+  <li>Apasă <span class="ui">Adaugă</span>.</li>
+</ol>
+<p>Dacă documentul are deja o numerotare, butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-hash"/></svg>Numerotare</span> o deschide direct pentru modificare.</p>
+
+<h3 id="antet">16.2. Antet / subsol</h3>
+<p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-header"/></svg>Antet/subsol</span>. Scrie textul dorit în câmpul <strong>Text</strong>. Alege o poziție de sus pentru <strong>antet</strong> sau una de jos pentru <strong>subsol</strong>.</p>
+<figure class="medium"><a href="img/20-dialog-antet.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/20-dialog-antet.png" width="600" height="404" alt="Un subsol cu titlul documentului și data, pe toate paginile în afară de prima." loading="lazy"></a><figcaption>Un subsol cu titlul documentului și data, pe toate paginile în afară de prima.</figcaption></figure>
+<p>În text poți folosi <strong>variabile</strong>, care se înlocuiesc automat pe fiecare pagină:</p>
+<table>
+  <tr><th style="width:24%">Scrii</th><th>Apare pe pagină</th></tr>
+  <tr><td><code>{n}</code></td><td>numărul paginii</td></tr>
+  <tr><td><code>{total}</code></td><td>numărul total de pagini</td></tr>
+  <tr><td><code>{date}</code></td><td>data de azi (de exemplu 16.11.2026)</td></tr>
+  <tr><td><code>{file}</code></td><td>numele documentului (cel din bara de sus)</td></tr>
+</table>
+<p>Exemplu: <code>Confidențial – {file} – pagina {n} din {total}</code>. Dacă nu găsești acoladele <code>{ }</code> pe tastatură, copiază exemplul: selectează-l cu mouse-ul, apasă <kbd>Ctrl</kbd> + <kbd>C</kbd>, apoi dă click în câmpul <strong>Text</strong> și apasă <kbd>Ctrl</kbd> + <kbd>V</kbd>.</p>
+
+<h3 id="watermark">16.3. Watermark</h3>
+<p>Un <strong>watermark</strong> (filigran) este un text mare, transparent, pe diagonala paginii, de exemplu „CONFIDENȚIAL”, „CIORNĂ” sau „COPIE”. Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-stamp"/></svg>Watermark</span>.</p>
+<figure class="medium"><a href="img/21-dialog-watermark.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/21-dialog-watermark.png" width="600" height="428" alt="Watermark „CIORNĂ”, la 45°, cu opacitate 20%." loading="lazy"></a><figcaption>Watermark „CIORNĂ”, la 45°, cu opacitate 20%.</figcaption></figure>
+<table>
+  <tr><th style="width:28%">Câmp</th><th>Ce înseamnă</th></tr>
+  <tr><td>Text watermark</td><td>Textul afișat.</td></tr>
+  <tr><td>Unghi (°)</td><td>Înclinarea: 45 = diagonală, 0 = orizontal, 90 = vertical.</td></tr>
+  <tr><td>Opacitate (%)</td><td>Cât de vizibil este: 100 = complet acoperitor, 20 = discret (recomandat 15–30).</td></tr>
+  <tr><td>Mărime (pt)</td><td>Lasă <strong>0</strong> pentru mărime automată: textul ocupă cam 80% din pagină.</td></tr>
+</table>
+<p>Watermark-ul se pune întotdeauna în centrul paginii.</p>
+
+<h3 id="imagine">16.4. Imagine (logo, ștampilă, semnătură scanată)</h3>
+<p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg>Imagine</span>.</p>
+<figure class="medium"><a href="img/22-dialog-imagine.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/22-dialog-imagine.png" width="600" height="408" alt="O ștampilă pusă jos în dreapta, doar pe pagina 7." loading="lazy"></a><figcaption>O ștampilă pusă jos în dreapta, doar pe pagina 7.</figcaption></figure>
+<ol class="steps">
+  <li>La <strong>Imagine</strong> alege fișierul. Recomandăm o imagine PNG cu fundal transparent, ca să nu acopere textul de dedesubt cu un dreptunghi alb.</li>
+  <li>La <strong>Lățime (% din pagină)</strong> alege cât de mare să fie (de exemplu 20 = o cincime din lățimea paginii).</li>
+  <li>La <strong>Opacitate</strong> lasă 100 pentru o imagine complet vizibilă sau micșorează pentru un efect transparent.</li>
+  <li>Alege poziția și paginile (de exemplu doar ultima pagină, pentru o ștampilă).</li>
+  <li>Apasă <span class="ui">Adaugă</span>.</li>
+</ol>
+
+<div class="callout note">
+  <span class="title">„Documentul are deja un strat de acest tip”</span>
+  <p>Dacă adaugi a doua oară același tip de suprapunere, fereastra îți propune să o editezi pe cea existentă (butonul <span class="ui">Editează-l pe cel existent</span>). Dacă vrei totuși una nouă (de exemplu un antet sus și un subsol jos), completează fereastra și apasă <span class="ui">Adaugă</span>.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="straturi">
+<h2><span class="chapter-number">17.</span>Panoul Straturi</h2>
+<p>Panoul <strong>Straturi</strong> din dreapta ecranului arată toate suprapunerile documentului. Se deschide singur la prima suprapunere adăugată. Îl mai poți deschide sau închide oricând cu butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>Straturi</span> din panglică. Bulina de pe buton arată câte straturi există.</p>
+<figure><a href="img/23-straturi.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/23-straturi.png" width="1440" height="900" alt="Document cu patru straturi: numerotare, subsol, watermark și o ștampilă pe ultima pagină." loading="lazy"></a><figcaption>Document cu patru straturi: numerotare, subsol, watermark și o ștampilă pe ultima pagină.</figcaption></figure>
+<p>Fiecare rând din panou arată tipul stratului, un rezumat (textul, poziția) și paginile pe care se aplică. În dreapta rândului ai trei butoane:</p>
+<table>
+  <tr><th style="width:18%">Buton</th><th>Ce face</th></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-edit"/></svg></span></td><td><strong>Editează</strong> – redeschide fereastra stratului, ca să schimbi textul, poziția, paginile etc. Merge și cu click oriunde pe rând. În fereastra de editare găsești și butonul <span class="ui">Șterge stratul</span>.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></span> / <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-eyeoff"/></svg></span></td><td><strong>Ascunde / Arată</strong> – stratul ascuns nu apare pe pagini și nici în fișierul descărcat, dar rămâne în listă pentru mai târziu.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg></span></td><td><strong>Șterge</strong> stratul (se poate anula cu <kbd>Ctrl</kbd> + <kbd>Z</kbd>).</td></tr>
+</table>
+<p>Butoanele din partea de jos a panoului adaugă straturi noi, la fel ca butoanele din panglică. Panoul se închide cu <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></span>.</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="previzualizare">
+<h2><span class="chapter-number">18.</span>Previzualizarea unei pagini</h2>
+<p>Ca să vezi o pagină mare, <strong>dă dublu-click</strong> pe miniatura ei (sau alege „Previzualizare” din meniul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></span>). Pagina se deschide peste tot ecranul, cu toate suprapunerile.</p>
+<figure><a href="img/24-previzualizare.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/24-previzualizare.png" width="1440" height="900" alt="Previzualizarea unei pagini." loading="lazy"></a><figcaption>Previzualizarea unei pagini.</figcaption></figure>
+<h3>Butoanele din bara de sus a previzualizării</h3>
+<table>
+  <tr><th style="width:30%">Buton</th><th>Ce face</th></tr>
+  <tr><td>◀ și ▶</td><td>Pagina anterioară / următoare.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-zoomout"/></svg></span> și <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-zoomin"/></svg></span></td><td>Micșorează / mărește pagina.</td></tr>
+  <tr><td>lista de zoom</td><td>Alegi direct: „Toată pagina”, „Pe lățime” sau un procent (50% … 600%). 100% înseamnă mărimea reală a paginii.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-fitpage"/></svg></span></td><td>Toată pagina încape pe ecran.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-fitwidth"/></svg></span></td><td>Pagina ocupă toată lățimea ecranului.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotl"/></svg></span> și <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotr"/></svg></span></td><td>Rotesc pagina afișată.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>Elimină</span></td><td>Scoate pagina din document și trece la următoarea.</td></tr>
+  <tr><td><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></span></td><td>Închide previzualizarea (sau tasta <kbd>Esc</kbd>).</td></tr>
+</table>
+<h3>Cu mouse-ul și tastatura</h3>
+<ul>
+  <li><kbd>Ctrl</kbd> + <strong>rotița mouse-ului</strong> – mărește sau micșorează exact în punctul de sub cursor;</li>
+  <li><strong>dublu-click</strong> pe pagină – comută între „Toată pagina” și 200% în punctul respectiv;</li>
+  <li>când pagina e mărită, <strong>trage cu mouse-ul</strong> ca s-o muți (ca pe o foaie pe masă);</li>
+  <li>tastele <kbd>←</kbd> <kbd>→</kbd> sau <kbd>PageUp</kbd> <kbd>PageDown</kbd> – pagina anterioară / următoare;</li>
+  <li><kbd>+</kbd> / <kbd>-</kbd> – zoom; <kbd>0</kbd> – toată pagina; <kbd>W</kbd> – pe lățime.</li>
+</ul>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="anulare">
+<h2><span class="chapter-number">19.</span>Anularea greșelilor</h2>
+<p>Aproape orice operație se poate anula: ștergeri, mutări, rotiri, inserări, decupări, încadrări, suprapuneri.</p>
+<ul>
+  <li><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg></span> din bara de sus sau <kbd>Ctrl</kbd> + <kbd>Z</kbd> – <strong>anulează</strong> ultima operație. Poți apăsa de mai multe ori, ca să te întorci mai mulți pași (până la 200).</li>
+  <li><span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-redo"/></svg></span> sau <kbd>Ctrl</kbd> + <kbd>Y</kbd> – <strong>reface</strong> operația anulată.</li>
+</ul>
+<p>Butoanele sunt estompate când nu există nimic de anulat sau de refăcut.</p>
+<div class="callout warn">
+  <span class="title">Istoricul nu se păstrează</span>
+  <p>Dacă închizi documentul, deschizi altul, schimbi limba sau închizi pagina browserului, istoricul se pierde. Descarcă rezultatul înainte.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="salvare">
+<h2><span class="chapter-number">20.</span>Salvarea (descărcarea) rezultatului</h2>
+<p>Modificările făcute în PageFix ajung într-un fișier abia când îl <strong>descarci</strong>. Fișierul original rămâne neschimbat.</p>
+
+<h3>1. Alege numele fișierului</h3>
+<ol class="steps">
+  <li>Dă click pe numele documentului din bara de sus (lângă sigla PageFix).</li>
+  <li>Șterge numele vechi și scrie-l pe cel nou, de exemplu „Contract semnat 2026”.</li>
+  <li>Apasă <kbd>Enter</kbd>.</li>
+</ol>
+<p>Nu e nevoie să scrii „.pdf”, se adaugă automat. Caracterele care nu sunt permise în numele fișierelor (<code>\ / : * ? " &lt; &gt; |</code>) se înlocuiesc cu „_”.</p>
+
+<h3>2. Descarcă</h3>
+<p>Apasă <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Descarcă PDF</span> (sau <kbd>Ctrl</kbd> + <kbd>S</kbd>). După câteva momente apare mesajul „Salvat: …” cu numele și mărimea fișierului.</p>
+
+<h3>3. Unde găsesc fișierul?</h3>
+<ul>
+  <li>De obicei, în folderul <strong>Descărcări</strong> (<em>Downloads</em>) al calculatorului.</li>
+  <li>În Google Chrome și Microsoft Edge, tastele <kbd>Ctrl</kbd> + <kbd>J</kbd> arată lista descărcărilor (în Firefox: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd>). De acolo poți deschide direct fișierul sau folderul în care se află.</li>
+  <li>În colțul din dreapta-sus al browserului apare de obicei și o iconiță de descărcare (o săgeată în jos); click pe ea arată ultimele fișiere descărcate.</li>
+  <li>Dacă browserul este setat să întrebe unde se salvează fiecare fișier, va apărea fereastra de alegere a locului.</li>
+</ul>
+
+<div class="callout warn">
+  <span class="title">Nu închide pagina fără să descarci</span>
+  <p>Dacă închizi fila browserului sau aplicația cu modificări nedescărcate, browserul te avertizează. Butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></span> (Închide documentul) cere și el confirmarea.</p>
+</div>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="personalizare">
+<h2><span class="chapter-number">21.</span>Temă, limbă și mărimea miniaturilor</h2>
+
+<h3>Tema luminoasă / întunecată</h3>
+<p>Butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></span> din bara de sus trece aplicația pe <strong>tema întunecată</strong>, mai odihnitoare pentru ochi seara. În tema întunecată butonul devine <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg></span> și te readuce la tema luminoasă. Alegerea este ținută minte de browser. Paginile PDF rămân albe, așa cum vor arăta la tipărire.</p>
+<figure><a href="img/26-tema-intunecata.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/26-tema-intunecata.png" width="1440" height="900" alt="Tema întunecată." loading="lazy"></a><figcaption>Tema întunecată.</figcaption></figure>
+
+<h3>Limba</h3>
+<p>Butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>EN</span> trece aplicația în engleză; în engleză butonul arată <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>RO</span> și te readuce la română.</p>
+<div class="callout warn">
+  <span class="title">Atenție</span>
+  <p>Schimbarea limbii reîncarcă pagina, iar <strong>documentul deschis se închide</strong>. Descarcă rezultatul înainte să schimbi limba.</p>
+</div>
+
+<h3>Mărimea miniaturilor</h3>
+<p>Glisorul din bara de stare (lângă iconița <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg></span>) mărește sau micșorează miniaturile paginilor. Trage-l spre dreapta pentru pagini mai mari, ușor de citit pe un ecran mare, sau spre stânga ca să vezi mai multe pagini deodată. Și această alegere este ținută minte de browser.</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="taste">
+<h2><span class="chapter-number">22.</span>Scurtături de tastatură</h2>
+<p>Pe Mac folosește tasta <kbd>⌘</kbd> (Cmd) în loc de <kbd>Ctrl</kbd>.</p>
+<h3>În ecranul principal</h3>
+<table>
+  <tr><th style="width:36%">Taste</th><th>Ce fac</th></tr>
+  <tr><td><kbd>F1</kbd></td><td>Deschide manualul de utilizare (funcționează oriunde în aplicație)</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>Descarcă documentul (PDF)</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>Anulează ultima operație</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + <kbd>Y</kbd> sau <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd></td><td>Reface operația anulată</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + <kbd>A</kbd></td><td>Selectează toate paginile</td></tr>
+  <tr><td><kbd>Esc</kbd></td><td>Anulează selecția / închide meniul deschis</td></tr>
+  <tr><td><kbd>Delete</kbd></td><td>Elimină paginile selectate</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + click, <kbd>Shift</kbd> + click</td><td>Selectează mai multe pagini (vezi <a href="#selectie">capitolul 5</a>)</td></tr>
+  <tr><td>dublu-click pe o pagină</td><td>Previzualizare</td></tr>
+</table>
+<h3>În previzualizare</h3>
+<table>
+  <tr><th style="width:36%">Taste</th><th>Ce fac</th></tr>
+  <tr><td><kbd>←</kbd> <kbd>→</kbd>, <kbd>PageUp</kbd> <kbd>PageDown</kbd></td><td>Pagina anterioară / următoare</td></tr>
+  <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Mărește / micșorează</td></tr>
+  <tr><td><kbd>0</kbd> (zero)</td><td>Toată pagina</td></tr>
+  <tr><td><kbd>W</kbd></td><td>Pe lățime</td></tr>
+  <tr><td><kbd>Ctrl</kbd> + rotița mouse-ului</td><td>Zoom în punctul de sub cursor</td></tr>
+  <tr><td><kbd>Alt</kbd> + <kbd>Home</kbd></td><td>Prima pagină</td></tr>
+  <tr><td><kbd>Esc</kbd></td><td>Închide previzualizarea</td></tr>
+</table>
+<h3>În ferestre (dialoguri)</h3>
+<p><kbd>Esc</kbd> închide fereastra fără să aplice nimic (la fel ca butonul <span class="ui">Renunță</span>).</p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="probleme">
+<h2><span class="chapter-number">23.</span>Întrebări frecvente și probleme</h2>
+
+<details><summary>Am apăsat „Descarcă PDF”, dar nu găsesc fișierul.</summary><div class="answer">
+<p>Uită-te în folderul <strong>Descărcări</strong> (Downloads) sau apasă <kbd>Ctrl</kbd> + <kbd>J</kbd> în browser (în Firefox <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd>) ca să vezi lista descărcărilor. Fișierul are numele scris în bara de sus a aplicației, cu „.pdf” la final.</p></div></details>
+
+<details><summary>Am modificat documentul, dar fișierul de pe calculator a rămas la fel.</summary><div class="answer">
+<p>Este normal: PageFix nu modifică niciodată fișierul original. Rezultatul este un fișier <strong>nou</strong>, creat cu <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Descarcă PDF</span>. Dacă vrei să-l înlocuiești pe cel vechi, mută sau redenumește fișierele din folder.</p></div></details>
+
+<details><summary>Butoanele de rotire nu fac nimic / apare „Selectează mai întâi una sau mai multe pagini.”</summary><div class="answer">
+<p>Butoanele din grupul Rotire lucrează doar pe paginile <strong>selectate</strong>. Dă click pe o pagină (sau bifează-i căsuța) și încearcă din nou. Pentru o singură pagină poți folosi și butoanele <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotl"/></svg></span> <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-rotr"/></svg></span> de sub miniatura ei.</p></div></details>
+
+<details><summary>Apare „Deschide mai întâi un document.”</summary><div class="answer">
+<p>Ai apăsat un buton care are nevoie de un document deschis. Deschide mai întâi un fișier (vezi <a href="#primii-pasi">Primii pași</a>).</p></div></details>
+
+<details><summary>Am șters, mutat sau rotit ceva din greșeală.</summary><div class="answer">
+<p>Apasă <kbd>Ctrl</kbd> + <kbd>Z</kbd> sau butonul <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg></span> din bara de sus. Repetă până ajungi la starea dorită.</p></div></details>
+
+<details><summary>Fișierul cere o parolă.</summary><div class="answer">
+<p>Documentul este protejat. Scrie parola primită de la cel care ți-a trimis fișierul. Fără parolă, fișierul nu poate fi deschis.</p></div></details>
+
+<details><summary>Apare „… este criptat. Vizualizarea merge, dar paginile salvate pot ieși goale sau corupte.”</summary><div class="answer">
+<p>Fișierul are restricții de modificare puse de emitent. Poți încerca să lucrezi cu el, dar verifică neapărat fișierul descărcat. Dacă paginile ies goale, cere o versiune fără restricții.</p></div></details>
+
+<details><summary>Apare „Interval invalid” sau „Pagina … nu există”.</summary><div class="answer">
+<p>Textul scris la „Pagini” nu respectă regulile sau se referă la o pagină care nu există. Recitește <a href="#intervale">capitolul 6</a>. Exemple corecte: <code>3</code>, <code>2, 5</code>, <code>4-9</code>, <code>10-</code>.</p></div></details>
+
+<details><summary>Miniaturile apar gri câteva momente.</summary><div class="answer">
+<p>Paginile se desenează pe rând, doar cele vizibile pe ecran (ca aplicația să rămână rapidă). La documentele mari sau scanate, desenarea poate dura puțin. Așteaptă câteva secunde.</p></div></details>
+
+<details><summary>Linkurile din document nu mai funcționează.</summary><div class="answer">
+<p>Ai folosit probabil <a href="#incadrare">Încadrarea în format</a>, care transformă paginile și pierde linkurile. Anulează cu <kbd>Ctrl</kbd> + <kbd>Z</kbd> și folosește <a href="#decupare">Decuparea</a>, care le păstrează.</p></div></details>
+
+<details><summary>Am schimbat limba și documentul a dispărut.</summary><div class="answer">
+<p>Schimbarea limbii reîncarcă aplicația și închide documentul (aplicația te avertizează înainte). Redeschide fișierul. Data viitoare, descarcă rezultatul înainte să schimbi limba.</p></div></details>
+
+<details><summary>Textul din antet sau watermark nu apare.</summary><div class="answer">
+<ul>
+  <li>Verifică în <a href="#straturi">panoul Straturi</a> dacă stratul nu este ascuns (iconița <span class="ui"><svg class="ic" aria-hidden="true"><use href="#i-eyeoff"/></svg></span>).</li>
+  <li>Verifică la „Se aplică la” dacă pagina respectivă este inclusă.</li>
+  <li>Verifică culoarea: un text gri închis nu se vede pe o bandă închisă la culoare. Alege altă culoare sau altă poziție.</li>
+</ul></div></details>
+
+<details><summary>Merge greu cu un document foarte mare.</summary><div class="answer">
+<p>Documentele scanate cu sute de pagini cer multă memorie. Închide celelalte file ale browserului, micșorează miniaturile cu glisorul din bara de stare sau lucrează pe bucăți (vezi <a href="#impartire">Împărțirea</a>).</p></div></details>
+
+<details><summary>Este sigur să lucrez cu documente confidențiale?</summary><div class="answer">
+<p>Da. Fișierele sunt prelucrate exclusiv în browserul de pe calculatorul tău și nu sunt trimise nicăieri. Fereastra „Despre” confirmă acest lucru.</p></div></details>
+
+<details><summary>Pe ecran apare „Lipsesc fișiere necesare: …”.</summary><div class="answer">
+<p>Instalarea aplicației este incompletă. Nu este o problemă a ta: anunță departamentul IT și trimite-le textul afișat.</p></div></details>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="limite">
+<h2><span class="chapter-number">24.</span>Ce nu poate face PageFix</h2>
+<p>Ca să nu cauți degeaba, iată ce <strong>nu</strong> face aplicația:</p>
+<ul>
+  <li><strong>nu modifică textul existent</strong> din pagini (nu poți corecta un cuvânt dintr-un PDF), dar poți adăuga text nou peste pagini (antet, subsol, watermark);</li>
+  <li><strong>nu recunoaște textul</strong> din paginile scanate (nu face OCR), deci nu poți căuta cuvinte într-o scanare;</li>
+  <li><strong>nu convertește</strong> în Word, Excel sau alte formate;</li>
+  <li><strong>nu micșorează</strong> (nu comprimă) fișierele mari;</li>
+  <li><strong>nu semnează digital</strong> documentele (o imagine a semnăturii sau a ștampilei poți însă adăuga, vezi <a href="#imagine">16.4</a>);</li>
+  <li><strong>nu completează formulare PDF</strong>;</li>
+  <li><strong>nu salvează automat</strong> lucrul neterminat: descarcă rezultatul înainte să închizi.</li>
+</ul>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="dictionar">
+<h2><span class="chapter-number">25.</span>Mic dicționar</h2>
+<table>
+  <tr><th style="width:26%">Termen</th><th>Ce înseamnă</th></tr>
+  <tr><td>PDF</td><td>Un tip de fișier pentru documente, care arată la fel pe orice calculator și la tipărire.</td></tr>
+  <tr><td>Browser</td><td>Programul cu care deschizi pagini de internet: Google Chrome, Microsoft Edge, Mozilla Firefox, Safari.</td></tr>
+  <tr><td>Miniatură</td><td>Imaginea mică a unei pagini, afișată în zona paginilor.</td></tr>
+  <tr><td>Selecție</td><td>Paginile alese (cu chenar albastru), asupra cărora se aplică următoarea operație.</td></tr>
+  <tr><td>Interval de pagini</td><td>Un șir de pagini scris prescurtat, de exemplu <code>2-5</code> (vezi <a href="#intervale">capitolul 6</a>).</td></tr>
+  <tr><td>Portret / peisaj</td><td>Orientarea paginii: în picioare (portret) sau culcată (peisaj).</td></tr>
+  <tr><td>A4, A3, A5, Letter, Legal</td><td>Mărimi standard de hârtie. A4 (210 × 297 mm) este foaia obișnuită de imprimantă; A3 e dublul ei, A5 jumătatea. Letter și Legal se folosesc în SUA.</td></tr>
+  <tr><td>mm</td><td>Milimetri – unitatea pentru margini.</td></tr>
+  <tr><td>pt (punct)</td><td>Unitatea pentru mărimea textului; un text obișnuit are 10–12 pt.</td></tr>
+  <tr><td>Antet / subsol</td><td>Text repetat sus (antet) sau jos (subsol) pe fiecare pagină.</td></tr>
+  <tr><td>Watermark (filigran)</td><td>Text mare și transparent pe pagină, de exemplu „CONFIDENȚIAL”.</td></tr>
+  <tr><td>Opacitate</td><td>Cât de „plin” se vede un element: 100% acoperitor, valori mici = transparent.</td></tr>
+  <tr><td>Suprapunere / strat</td><td>Text sau imagine pus peste pagini, care se poate edita oricând până la descărcare.</td></tr>
+  <tr><td>Decupare</td><td>Ascunderea marginilor unei pagini.</td></tr>
+  <tr><td>Încadrare</td><td>Aducerea conținutului paginii la un format standard (A4 etc.).</td></tr>
+  <tr><td>Intercalare</td><td>Îmbinarea alternativă a paginilor din două documente (față, verso, față, verso…).</td></tr>
+  <tr><td>Arhivă ZIP</td><td>Un singur fișier care conține mai multe fișiere; se „dezarhivează” ca să le obții (vezi <a href="#impartire">capitolul 12</a>).</td></tr>
+  <tr><td>Descărcări (Downloads)</td><td>Folderul în care browserul salvează fișierele descărcate.</td></tr>
+  <tr><td>Drag &amp; drop (tragere)</td><td>Apeși pe un element, ții butonul mouse-ului apăsat, muți mouse-ul și dai drumul în locul dorit.</td></tr>
+</table>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<!-- ===================================================================== -->
+<section class="chapter" id="despre">
+<h2><span class="chapter-number">26.</span>Despre aplicație</h2>
+<p>Click pe sigla <strong>PageFix</strong> din colțul stânga-sus (sau pe „PageFix v0.7.0” din bara de stare) deschide fereastra <strong>Despre</strong>, cu versiunea aplicației, datele autorului și lista componentelor folosite.</p>
+<figure class="small"><a href="img/27-despre.png" target="_blank" title="Deschide imaginea la mărime completă"><img src="img/27-despre.png" width="440" height="516" alt="Fereastra „Despre”." loading="lazy"></a><figcaption>Fereastra „Despre”.</figcaption></figure>
+<p>PageFix este un produs <strong>SEUL</strong>.<br>
+Site: <a href="https://code-by-seul.ro/" target="_blank" rel="noopener">https://code-by-seul.ro/</a><br>
+E-mail: <a href="mailto:PageFix@code-by-seul.ro">PageFix@code-by-seul.ro</a></p>
+<a class="back-to-top" href="#content">↑ Înapoi sus</a>
+</section>
+
+<footer class="manual-footer">PageFix – Manual de utilizare · versiunea 0.7.0 · © 2026 SEUL – <a href="https://code-by-seul.ro/" target="_blank" rel="noopener">code-by-seul.ro</a></footer>
+
+</main>
+</div>
+
+<script>
+// =====================================================================
+//  Cuprins: căutare, evidențierea capitolului curent, meniu pe ecrane mici
+// =====================================================================
+
+/** Text fără diacritice și cu litere mici, pentru căutare („Ștergere” -> „stergere”). */
+function simplifyText(text) {
+  return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+/** Ascunde capitolele care nu conțin textul căutat (și legăturile lor din cuprins). */
+function filterChapters() {
+  var searchText = simplifyText(document.getElementById('tocSearch').value.trim());
+  var chapters = document.querySelectorAll('section.chapter');
+  var visibleCount = 0;
+
+  for (var index = 0; index < chapters.length; index++) {
+    var chapter = chapters[index];
+    var tocLink = document.querySelector('#tocList a[href="#' + chapter.id + '"]');
+
+    var matches = true;
+    if (searchText !== '') {
+      matches = simplifyText(chapter.textContent).indexOf(searchText) !== -1;
+    }
+
+    if (matches) {
+      chapter.classList.remove('hidden-by-search');
+      if (tocLink) {
+        tocLink.parentElement.classList.remove('hidden-by-search');
+      }
+      visibleCount++;
+    } else {
+      chapter.classList.add('hidden-by-search');
+      if (tocLink) {
+        tocLink.parentElement.classList.add('hidden-by-search');
+      }
+    }
+  }
+
+  var noResultsMessage = document.getElementById('tocNoResults');
+  if (visibleCount === 0) {
+    noResultsMessage.style.display = 'block';
+  } else {
+    noResultsMessage.style.display = 'none';
+  }
+}
+
+/** Evidențiază în cuprins capitolul aflat acum pe ecran. */
+function highlightCurrentChapter(entries) {
+  for (var index = 0; index < entries.length; index++) {
+    var entry = entries[index];
+    if (!entry.isIntersecting) {
+      continue;
+    }
+    var allLinks = document.querySelectorAll('#tocList a');
+    for (var linkIndex = 0; linkIndex < allLinks.length; linkIndex++) {
+      allLinks[linkIndex].classList.remove('current');
+    }
+    var currentLink = document.querySelector('#tocList a[href="#' + entry.target.id + '"]');
+    if (currentLink) {
+      currentLink.classList.add('current');
+    }
+  }
+}
+
+/** Pe ecranele mici, cuprinsul se deschide / închide cu butonul „Cuprins”. */
+function toggleTableOfContents() {
+  var toc = document.getElementById('toc');
+  var toggleButton = document.getElementById('tocToggle');
+  if (toc.classList.contains('open')) {
+    toc.classList.remove('open');
+    toggleButton.setAttribute('aria-expanded', 'false');
+  } else {
+    toc.classList.add('open');
+    toggleButton.setAttribute('aria-expanded', 'true');
+  }
+}
+
+/** După alegerea unui capitol pe ecran mic, cuprinsul se închide. */
+function handleTocLinkClick(event) {
+  if (event.target.tagName === 'A') {
+    document.getElementById('toc').classList.remove('open');
+    document.getElementById('tocToggle').setAttribute('aria-expanded', 'false');
+  }
+}
+
+document.getElementById('tocSearch').addEventListener('input', filterChapters);
+document.getElementById('tocToggle').addEventListener('click', toggleTableOfContents);
+document.getElementById('tocList').addEventListener('click', handleTocLinkClick);
+
+if ('IntersectionObserver' in window) {
+  var chapterObserver = new IntersectionObserver(highlightCurrentChapter, { rootMargin: '-80px 0px -70% 0px' });
+  var chaptersToObserve = document.querySelectorAll('section.chapter');
+  for (var chapterIndex = 0; chapterIndex < chaptersToObserve.length; chapterIndex++) {
+    chapterObserver.observe(chaptersToObserve[chapterIndex]);
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+PageFix
+Copyright 2026 Marius SEUL – https://code-by-seul.ro/ (PageFix@code-by-seul.ro)
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It bundles, unmodified, the following third-party components, each under its own license:
+  - pdf.js            Copyright Mozilla Foundation          Apache-2.0
+  - pdf-lib           Copyright Andrew Dillon               MIT
+  - JSZip             Copyright Stuart Knightley et al.     MIT
+  - Liberation Sans   Copyright Google Corp., Red Hat, Inc.  SIL Open Font License 1.1
+and the support files distributed with pdf.js (CMaps, standard fonts, ICC profiles,
+WebAssembly decoders). Details and license texts: THIRD_PARTY_NOTICES.md and the lib/ folder.
